@@ -4,7 +4,6 @@ import (
 	"os"
 	"strconv"
 	"testing"
-	"time"
 )
 
 var testEnvs map[string]string
@@ -30,7 +29,7 @@ func TestGetNewConfig(t *testing.T) {
 			err,
 		)
 	}
-	if config.dcLabel != testEnvs["DC_LABEL"] {
+	if config.DCLabel != testEnvs["DC_LABEL"] {
 		t.Fail()
 		t.Logf(
 			"%s failed. Reason: %s",
@@ -38,7 +37,7 @@ func TestGetNewConfig(t *testing.T) {
 			"Value of DC_LABEL was incorrect parsed",
 		)
 	}
-	if config.defaultLocation != testEnvs["DEFAULT_DC"] {
+	if config.DefaultLocation != testEnvs["DEFAULT_DC"] {
 		t.Fail()
 		t.Logf(
 			"%s failed. Reason: %s",
@@ -50,7 +49,7 @@ func TestGetNewConfig(t *testing.T) {
 	if err != nil {
 		t.Fatalf("Error: %s", err)
 	}
-	if config.syncInterval != time.Duration(seconds)*time.Second {
+	if config.SyncInterval != seconds {
 		t.Fail()
 		t.Logf(
 			"%s failed. Reason: %s",

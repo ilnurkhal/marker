@@ -19,13 +19,17 @@ type Marker struct {
 	config       *Config
 }
 
-func (m *Marker) setMarks(ctx context.Context) (markerMap map[string]string, err error) {
+func (m *Marker) setMarks(ctx context.Context, markerMap map[string]string) (err error) {
 	for node, dataCenter := range markerMap {
 		labels := map[string]string{
-			"DC": dataCenter,
+			m.config.DCLabel: dataCenter,
 		}
-		m.labelNode(ctx, node, labels)
+		err = m.labelNode(ctx, node, labels)
+		if err != nil {
+			return
+		}
 	}
+	return
 }
 
 func (m *Marker) makeMarkerMap(ctx context.Context) (markerMap map[string]string, err error) {
@@ -59,7 +63,7 @@ func (m *Marker) getNodes(ctx context.Context) (nodeMap map[string]string, err e
 }
 
 func (m *Marker) getLocation(nodeAddress string) (location string, err error) {
-	location = m.config.defaultLocation
+	location = m.config.DefaultLocation
 	status := "active"
 	// TODO: Check if nodeAddress is IP
 	params := ipam.IpamPrefixesListParams{

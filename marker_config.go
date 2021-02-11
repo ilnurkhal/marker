@@ -5,14 +5,13 @@ import (
 	"os"
 	"reflect"
 	"strconv"
-	"time"
 )
 
 // Config for marker
 type Config struct {
-	dcLabel         string        `env:"DC_LABEL"`
-	defaultLocation string        `env:"DEFAULT_DC"`
-	syncInterval    time.Duration `env:"SYNC_INTERVAL_SECONDS"`
+	DCLabel         string `env:"DC_LABEL"`
+	DefaultLocation string `env:"DEFAULT_DC"`
+	SyncInterval    int    `env:"SYNC_INTERVAL_SECONDS"`
 }
 
 // ParseFromEnv parses configs from env
@@ -26,10 +25,9 @@ func (conf *Config) parseFromEnv() error {
 			case reflect.String:
 				fields.Field(i).SetString(value)
 			case reflect.Int: // Case for syncInterval
-				duration, err := strconv.Atoi(value)
-				durSeconds := time.Second * time.Duration(duration)
+				syncInterval, err := strconv.Atoi(value)
 				if err == nil {
-					fields.Field(i).SetInt(int64(durSeconds))
+					fields.Field(i).SetInt(int64(syncInterval))
 				} else {
 					fields.Field(i).SetInt(60)
 				}
