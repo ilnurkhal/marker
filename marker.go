@@ -4,7 +4,6 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-	"time"
 
 	netboxClient "github.com/netbox-community/go-netbox/netbox/client"
 	"github.com/netbox-community/go-netbox/netbox/client/ipam"
@@ -13,14 +12,35 @@ import (
 	"k8s.io/client-go/kubernetes"
 )
 
+// Marker marks nodes by label
 type Marker struct {
 	k8sClient    *kubernetes.Clientset
 	netboxClient *netboxClient.NetBoxAPI
-	syncInterval time.Duration
+	config       *Config
 }
 
-func (m *Marker) makeMarkerMap() (markerMap map[string]string, err error) {
+func (m *Marker) setMarks(ctx context.Context) (markerMap map[string]string, err error) {
+	for node, dataCenter := range markerMap {
+		labels := map[string]string{
+			"DC": dataCenter,
+		}
+		m.labelNode(ctx, node, labels)
+	}
+}
 
+func (m *Marker) makeMarkerMap(ctx context.Context) (markerMap map[string]string, err error) {
+	nodes, err := m.getNodes(ctx)
+	if err != nil {
+		return
+	}
+	for nodeName, nodeAddress := range nodes {
+		location, err := m.getLocation(nodeAddress)
+		if err != nil {
+			return markerMap, err
+		}
+		markerMap[nodeName] = location
+	}
+	return
 }
 
 func (m *Marker) getNodes(ctx context.Context) (nodeMap map[string]string, err error) {
@@ -39,7 +59,7 @@ func (m *Marker) getNodes(ctx context.Context) (nodeMap map[string]string, err e
 }
 
 func (m *Marker) getLocation(nodeAddress string) (location string, err error) {
-	location = "Unknown" // Default location
+	location = m.config.defaultLocation
 	status := "active"
 	// TODO: Check if nodeAddress is IP
 	params := ipam.IpamPrefixesListParams{
