@@ -48,6 +48,7 @@ func (m *Marker) makeMarkerMap(ctx context.Context) (markerMap map[string]string
 }
 
 func (m *Marker) getNodes(ctx context.Context) (nodeMap map[string]string, err error) {
+	nodeMap = make(map[string]string)
 	nodes, err := m.k8sClient.CoreV1().Nodes().List(ctx, v1.ListOptions{})
 	if err != nil {
 		return
@@ -112,4 +113,15 @@ func (m *Marker) labelNode(ctx context.Context, nodeName string, labels map[stri
 	)
 	return
 
+}
+
+// GetNewMarker returns new exemplar of marker
+func GetNewMarker(k8sClientset *kubernetes.Clientset, netboxClient *netboxClient.NetBoxAPI,
+	config *Config) *Marker {
+	marker := Marker{
+		k8sClientset,
+		netboxClient,
+		config,
+	}
+	return &marker
 }

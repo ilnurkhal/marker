@@ -1,7 +1,6 @@
 package marker
 
 import (
-	"flag"
 	"path/filepath"
 
 	"k8s.io/client-go/kubernetes"
@@ -14,17 +13,11 @@ import (
 func GetNewK8sClient() (*kubernetes.Clientset, error) {
 	config, err := rest.InClusterConfig()
 	if err != nil {
-		var kubeconfig *string
+		var kubeconfig string
 		if home := homedir.HomeDir(); home != "" {
-			kubeconfig = flag.String(
-				"kubeconfig",
-				filepath.Join(home, ".kube", "config"),
-				"(optional) absolute path to the kubeconfig file")
-		} else {
-			kubeconfig = flag.String("kubeconfig", "", "absolute path to the kubeconfig file")
+			kubeconfig = filepath.Join(home, ".kube", "config")
 		}
-		flag.Parse()
-		config, err = clientcmd.BuildConfigFromFlags("", *kubeconfig)
+		config, err = clientcmd.BuildConfigFromFlags("", kubeconfig)
 		if err != nil {
 			return nil, err
 		}
