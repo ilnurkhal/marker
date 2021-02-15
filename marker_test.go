@@ -8,6 +8,7 @@ import (
 
 	httptransport "github.com/go-openapi/runtime/client"
 	"github.com/netbox-community/go-netbox/netbox/client"
+	"github.com/rs/zerolog"
 	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
@@ -52,12 +53,16 @@ func init() {
 	if err != nil {
 		fmt.Println("Error", err)
 	}
+	logger := zerolog.New(os.Stdout).With().
+		Timestamp().
+		Logger()
 
-	marker = &Marker{
+	marker = GetNewMarker(
 		clientSet,
 		netBoxClient,
 		&config,
-	}
+		&logger,
+	)
 
 }
 

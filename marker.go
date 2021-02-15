@@ -8,6 +8,7 @@ import (
 
 	netboxClient "github.com/netbox-community/go-netbox/netbox/client"
 	"github.com/netbox-community/go-netbox/netbox/client/ipam"
+	"github.com/rs/zerolog"
 	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/types"
 	"k8s.io/client-go/kubernetes"
@@ -18,6 +19,46 @@ type Marker struct {
 	k8sClient    *kubernetes.Clientset
 	netboxClient *netboxClient.NetBoxAPI
 	config       *Config
+	logger       *zerolog.Logger
+}
+
+// Run runs marker loop
+func (m *Marker) Run(ctx context.Context) error {
+	ticker := time.NewTicker(
+		time.Duration(m.config.SyncInterval) * time.Second,
+	)
+	defer ticker.Stop()
+	for {
+		select {
+		case <-ctx.Done():
+			m.logger.Warn().
+				Msg("Context was canceled, waiting for graceful shutdown")
+			// Graceful shutdown
+			return nil
+
+		case <-ticker.C:
+			// DO something
+			mm, err := m.makeMarkerMap(ctx)
+			if err != nil {
+				m.logger.Error().
+					Err(err).
+					Msg("Error occurred while making the markerMap")
+			}
+			m.logger.Debug().
+				Str("marker_map", fmt.Sprint(mm)).
+				Msg("markerMap was made")
+			err = m.setMarks(ctx, mm)
+			if err != nil {
+				m.logger.Error().
+					Err(err).
+					Msg("Error occurred while making the markerMap")
+			} else {
+				m.logger.Info().
+					Msg("Nodes were labeled")
+			}
+		}
+	}
+
 }
 
 func (m *Marker) setMarks(ctx context.Context, markerMap map[string]string) (err error) {
@@ -33,10 +74,11 @@ func (m *Marker) setMarks(ctx context.Context, markerMap map[string]string) (err
 	return
 }
 
-func (m *Marker) makeMarkerMap(ctx context.Context) (markerMap map[string]string, err error) {
+func (m *Marker) makeMarkerMap(ctx context.Context) (map[string]string, error) {
+	markerMap := make(map[string]string)
 	nodes, err := m.getNodes(ctx)
 	if err != nil {
-		return
+		return markerMap, err
 	}
 	for nodeName, nodeAddress := range nodes {
 		location, err := m.getLocation(nodeAddress)
@@ -45,7 +87,7 @@ func (m *Marker) makeMarkerMap(ctx context.Context) (markerMap map[string]string
 		}
 		markerMap[nodeName] = location
 	}
-	return
+	return markerMap, err
 }
 
 func (m *Marker) getNodes(ctx context.Context) (nodeMap map[string]string, err error) {
@@ -120,11 +162,12 @@ func (m *Marker) labelNode(ctx context.Context, nodeName string, labels map[stri
 
 // GetNewMarker returns new exemplar of marker
 func GetNewMarker(k8sClientset *kubernetes.Clientset, netboxClient *netboxClient.NetBoxAPI,
-	config *Config) *Marker {
+	config *Config, logger *zerolog.Logger) *Marker {
 	marker := Marker{
 		k8sClientset,
 		netboxClient,
 		config,
+		logger,
 	}
 	return &marker
 }

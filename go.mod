@@ -14,6 +14,7 @@ require (
 	github.com/mailru/easyjson v0.7.7 // indirect
 	github.com/netbox-community/go-netbox v0.0.0-20201107160141-927b38be4340
 	github.com/peterbourgon/diskv v2.0.1+incompatible // indirect
+	github.com/rs/zerolog v1.20.0
 	golang.org/x/crypto v0.0.0-20201221181555-eec23a3978ad // indirect
 	golang.org/x/net v0.0.0-20210119194325-5f4716e94777 // indirect
 	golang.org/x/oauth2 v0.0.0-20210201163806-010130855d6c // indirect
