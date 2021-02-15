@@ -2,17 +2,21 @@ package marker
 
 import (
 	"context"
-	"encoding/json"
 	"fmt"
 	"os"
 	"testing"
 
-	"github.com/netbox-community/go-netbox/netbox"
+	httptransport "github.com/go-openapi/runtime/client"
+	"github.com/netbox-community/go-netbox/netbox/client"
 	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	"k8s.io/apimachinery/pkg/types"
 )
 
-var marker *Marker
+var (
+	marker      *Marker
+	testAddress = os.Getenv("TEST_NODE_ADDRESS")
+	netboxHost  = os.Getenv("NETBOX_HOST")
+	netboxToken = os.Getenv("NETBOX_TOKEN")
+)
 
 const (
 	nodeName = "minikube"
@@ -35,10 +39,16 @@ func init() {
 	if err != nil {
 		fmt.Println("Error:", err)
 	}
-	netBoxClient := netbox.NewNetboxWithAPIKey(
-		"your.netbox.host:8000",
-		"your_netbox_token",
-	)
+	transport := httptransport.New(
+		netboxHost,
+		client.DefaultBasePath,
+		[]string{"https"})
+	transport.DefaultAuthentication = httptransport.APIKeyAuth(
+		"Authorization",
+		"header",
+		fmt.Sprintf("Token %s", netboxToken))
+	netBoxClient := client.New(transport, nil)
+
 	if err != nil {
 		fmt.Println("Error", err)
 	}
@@ -66,6 +76,22 @@ func TestGetNodes(t *testing.T) {
 		t.Log("There are no Nodes")
 	}
 
+}
+
+func TestGetLocation(t *testing.T) {
+	location, err := marker.getLocation(testAddress)
+	if err != nil {
+		t.Fail()
+		t.Logf(
+			"%s failed. Error: %s",
+			t.Name(),
+			err,
+		)
+	}
+	if len(location) < 1 {
+		t.Fail()
+		t.Log("Empty location")
+	}
 }
 
 func TestLabelNode(t *testing.T) {
@@ -108,8 +134,8 @@ func TestLabelNode(t *testing.T) {
 		t.Log("There is no test label")
 	}
 	delete(labels, "MARKER")
-
-	jsonLabels, err := json.Marshal(labels)
+	testNode.SetLabels(labels)
+	_, err = marker.k8sClient.CoreV1().Nodes().Update(context.TODO(), testNode, v1.UpdateOptions{})
 	if err != nil {
 		t.Fail()
 		t.Logf(
@@ -118,38 +144,4 @@ func TestLabelNode(t *testing.T) {
 			err,
 		)
 	}
-
-	patchJson, err := json.Marshal(
-		map[string]string{
-			"op":    "repalce",
-			"path":  "metadata/labels",
-			"value": fmt.Sprint(jsonLabels),
-		},
-	)
-
-	if err != nil {
-		t.Fail()
-		t.Logf(
-			"%s failed. Error: %s",
-			t.Name(),
-			err,
-		)
-	}
-
-	_, err = marker.k8sClient.CoreV1().Nodes().Patch(
-		context.TODO(),
-		nodeName,
-		types.JSONPatchType,
-		patchJson,
-		v1.PatchOptions{},
-	)
-	if err != nil {
-		t.Fail()
-		t.Logf(
-			"%s failed. Error: %s",
-			t.Name(),
-			err,
-		)
-	}
-
 }

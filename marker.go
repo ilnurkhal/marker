@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"time"
 
 	netboxClient "github.com/netbox-community/go-netbox/netbox/client"
 	"github.com/netbox-community/go-netbox/netbox/client/ipam"
@@ -70,6 +71,7 @@ func (m *Marker) getLocation(nodeAddress string) (location string, err error) {
 	params := ipam.IpamPrefixesListParams{
 		Q: &nodeAddress,
 	}
+	params.WithTimeout(time.Second * 5)
 	prefixList, err := m.netboxClient.Ipam.IpamPrefixesList(
 		&params,
 		nil,
@@ -77,8 +79,9 @@ func (m *Marker) getLocation(nodeAddress string) (location string, err error) {
 	if err != nil {
 		return
 	}
+
 	for _, prefix := range prefixList.Payload.Results {
-		if prefix.Status.Value == &status {
+		if *prefix.Status.Value == status {
 			location = *prefix.Site.Name
 		}
 	}

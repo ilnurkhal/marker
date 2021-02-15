@@ -4,7 +4,7 @@ go 1.15
 
 require (
 	github.com/go-openapi/errors v0.20.0 // indirect
-	github.com/go-openapi/runtime v0.19.26 // indirect
+	github.com/go-openapi/runtime v0.19.26
 	github.com/go-openapi/validate v0.20.2 // indirect
 	github.com/gogo/protobuf v1.3.2 // indirect
 	github.com/google/gofuzz v1.2.0 // indirect
