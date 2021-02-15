@@ -39,6 +39,15 @@ func (conf *Config) parseFromEnv() error {
 	return nil
 }
 
+func (conf *Config) String() string {
+	return fmt.Sprintf(
+		"DCLabel: %s DefaultLocation: %s, SyncInterval: %v",
+		conf.DCLabel,
+		conf.DefaultLocation,
+		conf.SyncInterval,
+	)
+}
+
 // GetNewConfig returns an exemplar of config
 func GetNewConfig() (config Config, err error) {
 	err = config.parseFromEnv()

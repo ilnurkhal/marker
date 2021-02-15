@@ -73,14 +73,11 @@ func main() {
 
 	go m.Run(context)
 
-	for {
-		select {
-		case receivedSignal := <-signalChan:
-			logger.Warn().
-				Str("signal", receivedSignal.String()).
-				Msg("Got signal")
-			cancel()
-
-		}
+	select {
+	case receivedSignal := <-signalChan:
+		logger.Warn().
+			Str("signal", receivedSignal.String()).
+			Msg("Got signal")
+		cancel()
 	}
 }

@@ -28,6 +28,10 @@ func (m *Marker) Run(ctx context.Context) error {
 		time.Duration(m.config.SyncInterval) * time.Second,
 	)
 	defer ticker.Stop()
+	m.logger.Info().
+		Str("Settings", fmt.Sprintf("%s", m.config)).
+		Msg("Marker has started")
+	m.markNodesByDC(ctx)
 	for {
 		select {
 		case <-ctx.Done():
@@ -37,28 +41,31 @@ func (m *Marker) Run(ctx context.Context) error {
 			return nil
 
 		case <-ticker.C:
-			// DO something
-			mm, err := m.makeMarkerMap(ctx)
-			if err != nil {
-				m.logger.Error().
-					Err(err).
-					Msg("Error occurred while making the markerMap")
-			}
-			m.logger.Debug().
-				Str("marker_map", fmt.Sprint(mm)).
-				Msg("markerMap was made")
-			err = m.setMarks(ctx, mm)
-			if err != nil {
-				m.logger.Error().
-					Err(err).
-					Msg("Error occurred while making the markerMap")
-			} else {
-				m.logger.Info().
-					Msg("Nodes were labeled")
-			}
+			m.markNodesByDC(ctx)
 		}
 	}
+}
 
+func (m *Marker) markNodesByDC(ctx context.Context) (err error) {
+	mm, err := m.makeMarkerMap(ctx)
+	if err != nil {
+		m.logger.Error().
+			Err(err).
+			Msg("Error occurred while making the markerMap")
+	}
+	m.logger.Debug().
+		Str("marker_map", fmt.Sprint(mm)).
+		Msg("markerMap was made")
+	err = m.setMarks(ctx, mm)
+	if err != nil {
+		m.logger.Error().
+			Err(err).
+			Msg("Error occurred while making the markerMap")
+	} else {
+		m.logger.Info().
+			Msg("Nodes were labeled")
+	}
+	return
 }
 
 func (m *Marker) setMarks(ctx context.Context, markerMap map[string]string) (err error) {
