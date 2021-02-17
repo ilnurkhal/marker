@@ -19,7 +19,7 @@ jobs:
       run: echo "::set-output name=sha_short::$(git rev-parse --short HEAD)"
 
     - name: Build image
-      run: docker build -t marker:`echo $GITHUB_SHA | head -c 8` . --no-cache
+      run: docker build -t h1dw0w/marker:`echo $GITHUB_SHA | head -c 8` . --no-cache
 
     - name: Log in to Docker Hub
       run: echo ${{ secrets.DOCKER_PASSWORD }} | docker login --password-stdin --username=${{ secrets.DOCKER_USERNAME }}
