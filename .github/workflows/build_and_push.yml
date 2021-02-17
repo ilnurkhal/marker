@@ -1,0 +1,23 @@
+---
+name: Release
+
+on:
+  push:
+    branches: [ release ]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v2
+      with:
+        fetch-depth: 0
+    - name: Build image
+      run: docker build -t marker:`echo $GITHUB_SHA | head -c 8` . --no-cache
+
+    - name: Log in to Docker Hub
+      run: echo ${{ secrets.DOCKER_PASSWORD }} | docker login --password-stdin --username=${{ secrets.DOCKER_USERNAME }}
+   
+    - name: Push image to Docker Hub
+      run: docker push marker:$`echo $GITHUB_SHA | head -c 8`
