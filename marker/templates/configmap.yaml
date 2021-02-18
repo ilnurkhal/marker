@@ -1,0 +1,12 @@
+{{ if .Values.application.configs }}
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: marker-config
+  labels:
+    {{- include "marker.labels" . | nindent 4 }}
+data:
+{{- range $key, $value := .Values.application.configs }}
+  {{ $key }}: {{ $value | quote }}
+{{- end }}
+{{- end }}

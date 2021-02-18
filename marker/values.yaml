@@ -1,0 +1,59 @@
+replicaCount: 1
+
+application:
+  configs:
+    DC_LABEL: "DC"
+    DEFAULT_DC: "Unknown"
+    SYNC_INTERVAL_SECONDS: "43200" # 12 hours
+    LOG_LEVEL: "1"                 # zerolog info
+    NETBOX_HOST: "my.netbox.host"
+  secrets: {}
+
+
+image:
+  repository: h1dw0w/marker
+  pullPolicy: IfNotPresent
+  tag: "7817bfd1"
+
+imagePullSecrets: []
+nameOverride: ""
+fullnameOverride: ""
+clusterRoleName: "marker-node-patcher"
+clusterRoleBindingName: "marker-node-patcher-binding"
+
+serviceAccount:
+  # Specifies whether a service account should be created
+  create: true
+  # Annotations to add to the service account
+  annotations: {}
+  # The name of the service account to use.
+  # If not set and create is true, a name is generated using the fullname template
+  name: "nodeMarker"
+
+podAnnotations: {}
+
+podSecurityContext: {}
+  # fsGroup: 2000
+
+securityContext: 
+  capabilities:
+    drop:
+    - "ALL"
+  readOnlyRootFilesystem: true
+  runAsNonRoot: true
+  runAsUser: 1000
+
+
+resources: 
+  limits:
+   cpu: 300m
+   memory: 128Mi
+  requests:
+   cpu: 200m
+   memory: 64Mi
+
+nodeSelector: {}
+
+tolerations: []
+
+affinity: {}
