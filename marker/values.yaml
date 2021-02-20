@@ -2,7 +2,7 @@ replicaCount: 1
 
 application:
   configs:
-    DC_LABEL: "DC"
+    DC_LABEL: "topology.kubernetes.io/zone"
     DEFAULT_DC: "Unknown"
     SYNC_INTERVAL_SECONDS: "43200" # 12 hours
     LOG_LEVEL: "1"                 # zerolog info
