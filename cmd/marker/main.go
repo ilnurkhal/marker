@@ -12,6 +12,7 @@ import (
 	"github.com/ilnurkhal/marker"
 	"github.com/netbox-community/go-netbox/netbox/client"
 	"github.com/rs/zerolog"
+	_ "k8s.io/client-go/plugin/pkg/client/auth/oidc"
 )
 
 func main() {
@@ -35,13 +36,13 @@ func main() {
 		}
 	}
 
-	config, err := marker.GetNewConfig()
+	config, err := marker.NewConfig()
 	if err != nil {
 		logger.Fatal().
 			Msg("Bad config")
 	}
 
-	clientSet, err := marker.GetNewK8sClient()
+	clientSet, err := marker.NewK8sClient()
 	if err != nil {
 		fmt.Println("Error:", err)
 	}

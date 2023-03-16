@@ -32,11 +32,11 @@ func init() {
 	for k, v := range testEnvs {
 		os.Setenv(k, v)
 	}
-	config, err := GetNewConfig()
+	config, err := NewConfig()
 	if err != nil {
 		fmt.Println("Error:", err)
 	}
-	clientSet, err := GetNewK8sClient()
+	clientSet, err := NewK8sClient()
 	if err != nil {
 		fmt.Println("Error:", err)
 	}

@@ -48,8 +48,8 @@ func (conf *Config) String() string {
 	)
 }
 
-// GetNewConfig returns an exemplar of config
-func GetNewConfig() (config Config, err error) {
+// NewConfig returns an exemplar of config
+func NewConfig() (config Config, err error) {
 	err = config.parseFromEnv()
 	return
 }

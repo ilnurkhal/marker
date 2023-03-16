@@ -60,7 +60,7 @@ func (m *Marker) markNodesByDC(ctx context.Context) (err error) {
 	if err != nil {
 		m.logger.Error().
 			Err(err).
-			Msg("Error occurred while making the markerMap")
+			Msg("Error occurred while setting the markerMap")
 	} else {
 		m.logger.Info().
 			Msg("Nodes were labeled")

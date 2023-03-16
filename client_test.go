@@ -5,7 +5,7 @@ import (
 )
 
 func TestGetNewK8sClient(t *testing.T) {
-	_, err := GetNewK8sClient()
+	_, err := NewK8sClient()
 	if err != nil {
 		t.Error(err)
 	}

@@ -20,7 +20,7 @@ func init() {
 }
 
 func TestGetNewConfig(t *testing.T) {
-	config, err := GetNewConfig()
+	config, err := NewConfig()
 	if err != nil {
 		t.Fail()
 		t.Logf(
